@@ -15,7 +15,8 @@ class Linker:
     def __init__(self, arguments: argparse.Namespace) -> None:
 
         self.arguments: argparse.Namespace = arguments
-        self.db_path: str = arguments.db
+        # add '/' to end of path
+        self.db_path: str = os.path.join(arguments.db, "")
         self.config: List[Dict[str, str]] = self.read_from_db()
         self.commands = {
             "add": self.add_to_db,
