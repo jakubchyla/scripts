@@ -11,7 +11,7 @@ import sys
 from typing import Dict, List
 
 
-class Linker:
+class Config:
     def __init__(self, arguments: argparse.Namespace) -> None:
 
         self.arguments: argparse.Namespace = arguments
@@ -34,7 +34,7 @@ class Linker:
             with open(self.db_path + "config.json", "r") as f:
                 return json.load(f)
         except FileNotFoundError:
-            print("config.json not found...", file=sys.stderr)
+            print("config.json not found", file=sys.stderr)
             sys.exit(-1)
 
     def write_to_db(self, config: List[Dict[str, str]]) -> None:
@@ -45,29 +45,31 @@ class Linker:
         name = self.arguments.name
         # check if name defined in arguments
         if name is None or name == "":
+            # generate new name
             while True:
                 name = self.generate_name()
                 if name not in [entry["name"] for entry in self.config]:
                     break
+
         # check if name already in db
         if name in [entry["name"] for entry in self.config]:
-            raise KeyError(f'Entry with "{name}" already present!')
+            raise KeyError(f"entry with {name} name already present")
 
         # check if dest path defined in arguments
         dest = str(pathlib.Path(self.arguments.dest))
         if dest is None or dest == "":
-            raise ValueError("dest can't be empty")
+            raise ValueError("DEST can't be empty")
         # check if entry with dest path already in db
         if dest in [entry["dest"] for entry in self.config]:
-            raise KeyError(f'Entry with "{self.arguments.dest}" path already present')
+            raise KeyError(f"entry with {self.arguments.dest} PATH already present")
 
         # copy source if exists, exit otherwise
         try:
-            db_file  = self.db_path + name
+            db_file = self.db_path + name
             src_file = pathlib.Path(self.arguments.src).expanduser()
             shutil.copyfile(str(src_file), db_file)
         except FileNotFoundError:
-            print(f"{src_file} does not exist!", file=sys.stderr)
+            print(f"{src_file} does not exist", file=sys.stderr)
             sys.exit(-1)
 
         # add entry to config file
@@ -86,7 +88,7 @@ class Linker:
                 self.write_to_db()
                 return
 
-        print(f"entry {self.arguments.name} does not exist!", file=sys.stderr)
+        print(f"entry {self.arguments.name} does not exist", file=sys.stderr)
         sys.exit(-1)
 
     # link all files in db
@@ -141,7 +143,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main():
-    Linker(parse_args()).exec_command()
+    Config(parse_args()).exec_command()
 
 
 if __name__ == "__main__":
