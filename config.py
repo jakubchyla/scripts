@@ -17,6 +17,10 @@ class Config:
         self.arguments: argparse.Namespace = arguments
         # add '/' to end of path
         self.db_path: str = os.path.join(arguments.db, "")
+        if self.db_path is None or self.db_path == "":
+            print("DB can't be empty", file=sys.stderr)
+            sys.exit(-1)
+
         self.config: List[Dict[str, str]] = self.read_from_db()
         self.commands = {
             "add": self.add_to_db,
@@ -69,7 +73,7 @@ class Config:
             src_file = pathlib.Path(self.arguments.src).expanduser()
             shutil.copyfile(str(src_file), db_file)
         except FileNotFoundError:
-            print(f"{src_file} does not exist", file=sys.stderr)
+            print(f"file does not exist", file=sys.stderr)
             sys.exit(-1)
 
         # add entry to config file
